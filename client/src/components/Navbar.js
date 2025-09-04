@@ -18,6 +18,7 @@ import {
   Divider,
   styled,
   alpha,
+  Fade,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -31,7 +32,9 @@ import ThemeCustomizer from "./ThemeCustomizer";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "../contexts/AuthContext";
 import SubscriptionsIcon from "@mui/icons-material/Subscriptions";
-// Search bar styles
+import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
+
+// Styled components for search bar
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -92,9 +95,7 @@ const NavLink = styled(Button)(({ theme, active }) => ({
   background: "none",
   minWidth: 70,
   transition: "color 0.3s ease",
-  borderBottom: active
-    ? `2px solid ${theme.palette.secondary.main}`
-    : "2px solid transparent",
+  borderBottom: active ? `2px solid ${theme.palette.secondary.main}` : "2px solid transparent",
   "&:hover, &:focus": {
     color: theme.palette.secondary.main,
     borderBottom: `2px solid ${theme.palette.secondary.main}`,
@@ -144,41 +145,65 @@ const DropdownArrow = styled(ArrowDropDownIcon)(({ theme }) => ({
   pointerEvents: "none",
 }));
 
-// ✅ Fixed StyledMenu with forwardRef so ModalProps works
+// Styled menu with modern glass look
 const BaseMenu = styled(Menu)(({ theme }) => ({
   "& .MuiPaper-root": {
-    borderRadius: 12,
-    minWidth: 220,
+    borderRadius: 16,
+    minWidth: 250,
     marginTop: theme.spacing(1.5),
-    paddingTop: theme.spacing(0.5),
-    paddingBottom: theme.spacing(0.5),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+    background: alpha(theme.palette.background.paper, 0.8),
+    backdropFilter: "blur(12px)",
     boxShadow:
-      "rgba(0, 0, 0, 0.15) 0px 3px 12px, rgba(0, 0, 0, 0.1) 0px 0px 2px",
+      "rgba(0, 0, 0, 0.24) 0px 3px 10px, rgba(0,0,0,0.12) 0px 0px 5px",
+    border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.pxToRem(14),
+    color: theme.palette.text.primary,
   },
   "& .MuiMenu-list": {
     paddingTop: 0,
     paddingBottom: 0,
   },
+  // Ensure MenuItem texts inherit theme typography
+  "& .MuiMenuItem-root": {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.pxToRem(14),
+    fontWeight: theme.typography.fontWeightRegular,
+    color: theme.palette.text.primary,
+  },
   "& .MuiPaper-root::before": {
     content: '""',
     position: "absolute",
-    top: 7,
-    right: 26,
-    width: 12,
-    height: 12,
-    bgcolor: theme.palette.background.paper,
+    top: 10,
+    right: 28,
+    width: 14,
+    height: 14,
+    background: alpha(theme.palette.background.paper, 0.8),
+    backdropFilter: "blur(12px)",
     transform: "rotate(45deg)",
-    boxShadow: "rgba(0, 0, 0, 0.1) -1px -1px 1px",
+    boxShadow:
+      "rgba(0, 0, 0, 0.1) -1px -1px 2px, rgba(0, 0, 0, 0.05) 1px 1px 1px",
+    borderLeft: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+    borderTop: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
     zIndex: 0,
   },
 }));
 
-const StyledMenu = forwardRef((props, ref) => (
-  <BaseMenu
-    ref={ref}
-    {...props}
-  />
-));
+
+const StyledMenu = forwardRef((props, ref) => {
+  return (
+    <BaseMenu
+      elevation={0}
+      ref={ref}
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      TransitionComponent={Fade}
+      {...props}
+    />
+  );
+});
 
 export default function Navbar() {
   const theme = useTheme();
@@ -211,9 +236,7 @@ export default function Navbar() {
   };
 
   const isActive = (path) =>
-    path === "/"
-      ? location.pathname === "/"
-      : location.pathname.startsWith(path);
+    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   return (
     <>
@@ -243,16 +266,29 @@ export default function Navbar() {
           }}
         >
           {/* Site Name */}
-          <Box sx={{ display: "flex", flexShrink: 0 }}>
-            <SiteName
+          
+          <SiteName sx={{ display: "flex", flexShrink: 0 }}>
+            <Typography
               component={RouterLink}
               to="/"
               tabIndex={0}
               aria-label="Go to homepage"
+              sx={{
+                fontFamily: theme.typography.fontFamily,
+                color: theme.palette.common.white,
+                fontWeight: 800,
+                letterSpacing: "0.18em",
+                textDecoration: "none",
+                userSelect: "none",
+                whiteSpace: "nowrap",
+                fontSize: "1.6rem",
+                textTransform: "uppercase",
+                cursor: "pointer",
+              }}
             >
               ResuMate
-            </SiteName>
-          </Box>
+            </Typography>
+          </SiteName>
 
           {/* Navigation Links */}
           <Box
@@ -368,8 +404,6 @@ export default function Navbar() {
                   "aria-labelledby": "user-menu-button",
                   role: "menu",
                 }}
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                transformOrigin={{ vertical: "top", horizontal: "right" }}
               >
                 <Box
                   sx={{
@@ -379,59 +413,70 @@ export default function Navbar() {
                     borderColor: "divider",
                   }}
                 >
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ fontWeight: "700", mb: 0.5 }}
-                  >
+                  <Typography variant="subtitle1" sx={{fontFamily: theme.typography.fontFamily, fontWeight: 700, mb: 0.5 }}>
                     {user?.username || "User"}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" noWrap>
+                  <Typography variant="body2" color="text.secondary" noWrap sx={{fontFamily: theme.typography.fontFamily}}>
                     {user?.email || ""}
                   </Typography>
                 </Box>
 
-                <MenuItem onClick={handleProfile} sx={{ borderRadius: 1 }}>
+                <MenuItem onClick={handleProfile} sx={{ borderRadius: 2, px: 3 }}>
                   <ListItemIcon>
                     <PersonIcon fontSize="small" />
                   </ListItemIcon>
                   Profile
                 </MenuItem>
+
+                <MenuItem
+                  onClick={() => {
+                    handleCloseUserMenu();
+                    navigate("/dashboard/profile");
+                  }}
+                  sx={{ borderRadius: 2, px: 3 }}
+                >
+                  <ListItemIcon>
+                    <DashboardCustomizeIcon fontSize="small" /> {/* Changed icon */}
+                  </ListItemIcon>
+                  Control Panel
+                </MenuItem>
+
                 <MenuItem
                   onClick={() => {
                     handleCloseUserMenu();
                     navigate("/subscription");
                   }}
+                  sx={{ borderRadius: 2, px: 3 }}
                 >
                   <ListItemIcon>
                     <SubscriptionsIcon fontSize="small" />
                   </ListItemIcon>
                   Subscription
                 </MenuItem>
+
                 <MenuItem
                   onClick={() => {
                     handleCloseUserMenu();
                     setThemeDialogOpen(true);
                   }}
-                  sx={{ borderRadius: 1 }}
+                  sx={{ borderRadius: 2, px: 3 }}
                 >
                   <ListItemIcon>
-                    <SettingsIcon fontSize="small" />
+                    <SettingsIcon fontSize="small" /> {/* This stays the same */}
                   </ListItemIcon>
                   Settings
                 </MenuItem>
 
-                <Divider sx={{ my: 0.5 }} />
+                <Divider sx={{ my: 1 }} />
 
-                <MenuItem
-                  onClick={handleLogout}
-                  sx={{ borderRadius: 1, color: "error.main" }}
-                >
+                <MenuItem onClick={handleLogout} sx={{ borderRadius: 2, color: "error.main", px: 3 }}>
                   <ListItemIcon>
                     <LogoutIcon fontSize="small" sx={{ color: "error.main" }} />
                   </ListItemIcon>
                   Logout
                 </MenuItem>
               </StyledMenu>
+
             </>
           ) : (
             <Button

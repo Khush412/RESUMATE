@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -13,9 +13,14 @@ import {
   Tooltip,
   useTheme,
   useMediaQuery,
+  CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import api from "../config/axios";
+import { useAuth } from "../contexts/AuthContext";
 
 const FEATURES = [
   "Create a single resume",
@@ -50,10 +55,19 @@ const PLANS = [
 export default function SubscriptionPage() {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
-
-  // Replace this with actual user subscription state fetched from API/context
-  const [currentPlan, setCurrentPlan] = useState("free");
+  const { user, loadUser } = useAuth();
+  const [currentPlan, setCurrentPlan] = useState(user?.subscription?.plan || "free");
   const [selectedPlan, setSelectedPlan] = useState(currentPlan);
+  const [loading, setLoading] = useState(false);
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // success or error
+
+  useEffect(() => {
+    setCurrentPlan(user?.subscription?.plan || "free");
+    setSelectedPlan(user?.subscription?.plan || "free");
+  }, [user?.subscription?.plan]);
 
   const isFeatureIncluded = (planKey, featureIndex) =>
     featureIndex < PLAN_FEATURE_COUNTS[planKey];
@@ -62,11 +76,49 @@ export default function SubscriptionPage() {
     setSelectedPlan(planKey);
   };
 
-  const handleConfirmSubscription = () => {
+  const handleConfirmSubscription = async () => {
     if (selectedPlan === currentPlan) return;
-    // Here connect to backend and process payment/update subscription
-    alert(`Successfully subscribed to ${selectedPlan.toUpperCase()} plan!`);
-    setCurrentPlan(selectedPlan);
+
+    if (!user || !user.id) {
+      setSnackbarMessage("You must be logged in to change subscription.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const now = new Date();
+      const oneMonthLater = new Date(now);
+      oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+      const response = await api.put(`/users/${user.id}/subscription`, {
+        plan: selectedPlan,
+        startDate: now.toISOString(),
+        endDate: oneMonthLater.toISOString(),
+        isActive: selectedPlan !== "free",
+      });
+
+      if (response?.data?.success) {
+        setCurrentPlan(selectedPlan);
+        await loadUser();
+        setSnackbarMessage(`Successfully subscribed to ${selectedPlan.toUpperCase()} plan!`);
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+      } else {
+        setSnackbarMessage("Failed to update subscription. Please try again.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      setSnackbarMessage("An error occurred while updating subscription.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      console.error("Subscription update error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -136,7 +188,7 @@ export default function SubscriptionPage() {
                     <Button
                       variant={isSelected ? "contained" : "outlined"}
                       color={isSelected ? "secondary" : "primary"}
-                      disabled={isCurrent}
+                      disabled={isCurrent || loading}
                       onClick={() => handleSelectPlan(plan.key)}
                       sx={{ minWidth: 140 }}
                     >
@@ -155,12 +207,17 @@ export default function SubscriptionPage() {
           variant="contained"
           color="secondary"
           size={isSmall ? "medium" : "large"}
-          disabled={selectedPlan === currentPlan}
+          disabled={selectedPlan === currentPlan || loading}
           onClick={handleConfirmSubscription}
+          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
         >
-          {selectedPlan === currentPlan ? "Subscribed" : "Confirm Subscription"}
+          {selectedPlan === currentPlan
+            ? "Subscribed"
+            : loading
+            ? "Processing..."
+            : "Confirm Subscription"}
         </Button>
-        {selectedPlan !== currentPlan && (
+        {selectedPlan !== currentPlan && !loading && (
           <Button
             variant="outlined"
             size={isSmall ? "medium" : "large"}
@@ -170,6 +227,21 @@ export default function SubscriptionPage() {
           </Button>
         )}
       </Box>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

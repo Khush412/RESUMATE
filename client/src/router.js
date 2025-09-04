@@ -6,7 +6,8 @@ import Login from "./pages/AuthPage";
 import AuthCallback from "./pages/AuthCallback";
 import Profile from "./pages/Profile";
 import Community from "./pages/Community";
-import Subscription from "./pages/Subcription";
+import Subscription from "./pages/Subscription";
+import Dashboard from "./pages/Control_panel";
 
 export default function AppRouter() {
   return (
@@ -18,6 +19,7 @@ export default function AppRouter() {
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/subscription" element={<Subscription />} />
+      <Route path="/dashboard/*" element={<Dashboard />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
