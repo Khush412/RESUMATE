@@ -6,7 +6,6 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const path = require('path');
 require('dotenv').config();
-console.log('Loaded MONGODB_URI:', process.env.MONGODB_URI);
 
 // Debug: Check if environment variables are loaded
 console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Found' : 'NOT FOUND');
@@ -21,6 +20,7 @@ require('./config/passport');
 // Import routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const resumesRoutes = require('./routes/resumes');
 
 // Connect to database
 connectDB();
@@ -100,6 +100,7 @@ app.use(passport.session());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
+app.use('/api/resumes', resumesRoutes);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/users', userRoutes);
 

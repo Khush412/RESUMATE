@@ -20,6 +20,9 @@ export default function AppRouter() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/subscription" element={<Subscription />} />
       <Route path="/dashboard/*" element={<Dashboard />} />
+      
+      
+      {/* Catch-all route */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

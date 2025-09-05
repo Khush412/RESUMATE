@@ -1,34 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const resumeSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  template: {
-    type: String,
-    required: true
-  },
-  data: {
-    type: mongoose.Schema.Types.Mixed,
-    required: true
-  },
-  isPublic: {
-    type: Boolean,
-    default: false
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
-});
-
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -188,7 +160,7 @@ const userSchema = new mongoose.Schema({
     }
   },
   // Resume management
-  resumes: [resumeSchema],
+  resumes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Resume' }],
   // User preferences
   preferences: {
     theme: {

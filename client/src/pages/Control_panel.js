@@ -1,117 +1,175 @@
 import React from "react";
-import { Box, Button, Typography, Grid, useTheme, useMediaQuery } from "@mui/material";
+import {
+  Box, ButtonBase, Typography, Grid, useTheme, useMediaQuery, Fade,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import SchoolIcon from '@mui/icons-material/School';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import PaymentIcon from '@mui/icons-material/Payment';
-import GroupIcon from '@mui/icons-material/Group';
-import DescriptionIcon from '@mui/icons-material/Description';
-import SettingsIcon from '@mui/icons-material/Settings';
+import SchoolIcon from "@mui/icons-material/School";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import PaymentIcon from "@mui/icons-material/Payment";
+import GroupIcon from "@mui/icons-material/Group";
+import DescriptionIcon from "@mui/icons-material/Description";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 const pages = [
-  { label: "Profile", path: "/profile", icon: AccountCircleIcon },
-  { label: "Subscription", path: "/subscription", icon: PaymentIcon },
-  { label: "Billing", path: "/billing", icon: PaymentIcon },
-  { label: "Community", path: "/community", icon: GroupIcon },
-  { label: "My Resumes", path: "/my-resumes", icon: DescriptionIcon },
-  { label: "Settings", path: "/settings", icon: SettingsIcon },
-  { label: "Courses", path: "/courses", icon: SchoolIcon },
+  { label: "Profile", path: "/profile", icon: AccountCircleIcon, color: "#786fa6" },
+  { label: "Subscription", path: "/subscription", icon: PaymentIcon, color: "#4dd0e1" },
+  { label: "Billing", path: "/billing", icon: PaymentIcon, color: "#ffb94b" },
+  { label: "Community", path: "/community", icon: GroupIcon, color: "#4fc3f7" },
+  { label: "My Resumes", path: "/my-resumes", icon: DescriptionIcon, color: "#b8e986" },
+  { label: "Settings", path: "/settings", icon: SettingsIcon, color: "#b388ff" },
+  { label: "Courses", path: "/courses", icon: SchoolIcon, color: "#ff8a65" },
 ];
 
 export default function ControlPanel() {
   const theme = useTheme();
   const navigate = useNavigate();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+
+  // Set fixed height and width for dashboard cards
+  const CARD_HEIGHT = 140;
+  const CARD_WIDTH = 250;
 
   return (
     <Box
       sx={{
-        minHeight: "calc(100vh - 64px)", // adjusting for navbar height
-        mt: "64px", // leaving space for navbar
-        px: { xs: 2, sm: 4, md: 8 },
-        py: { xs: 3, sm: 6 },
+        minHeight: "100vh",
         bgcolor: theme.palette.background.default,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        textAlign: "center",
+        pt: { xs: 7, sm: 10 },
+        pb: 7,
+        px: { xs: 1, sm: 4, md: 8 },
       }}
     >
-      <Typography
-        variant={isSmallScreen ? "h4" : "h2"}
+      {/* Dashboard Title */}
+      <Fade in>
+        <Typography
+          variant={isSmall ? "h5" : "h3"}
+          fontWeight={900}
+          sx={{
+            mb: 1,
+            letterSpacing: 2,
+            fontFamily: theme.typography.fontFamily,
+            color: theme.palette.primary.main,
+            textAlign: "center",
+            textTransform: "uppercase",
+          }}
+        >
+          Control Panel
+        </Typography>
+      </Fade>
+      <Box
         sx={{
-          fontWeight: theme.typography.fontWeightBold,
-          fontFamily: theme.typography.fontFamily,
-          letterSpacing: 1.2,
-          color: theme.palette.text.primary,
-          mb: 6,
-          userSelect: "none",
-          width: "100%",
-          maxWidth: 600,
+          height: 5,
+          width: 62,
+          background: `linear-gradient(90deg,${theme.palette.primary.main}30,${theme.palette.secondary.main}80)`,
+          borderRadius: 6,
+          mx: "auto",
+          mb: { xs: 4, sm: 5 },
         }}
-      >
-        Control Panel
-      </Typography>
+      />
 
-      <Grid container spacing={{ xs: 3, sm: 4, md: 6 }} justifyContent="center" sx={{ width: "100%", maxWidth: 1200 }}>
-        {pages.map(({ label, path, icon: Icon }) => (
-          <Grid 
-            key={label} 
-            item 
-            xs={12} 
-            sm={6} 
-            md={4} 
-            lg={3} 
-            sx={{ display: "flex", justifyContent: "center" }}
+      {/* Dashboard Grid */}
+      <Grid
+        container
+        spacing={isSmall ? 3 : 4}
+        justifyContent="center"
+        alignItems="stretch"
+        sx={{ maxWidth: 1050, mx: "auto", width: "100%" }}
+      >
+        {pages.map(({ label, path, icon: Icon, color }) => (
+          <Grid
+            key={label}
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "stretch",
+              minHeight: CARD_HEIGHT,
+            }}
           >
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
+            <ButtonBase
               onClick={() => navigate(path)}
-              aria-label={`Go to ${label}`}
+              focusRipple
               sx={{
+                width: CARD_WIDTH,
+                minWidth: CARD_WIDTH,
+                maxWidth: CARD_WIDTH,
+                height: CARD_HEIGHT,
+                minHeight: CARD_HEIGHT,
+                maxHeight: CARD_HEIGHT,
+                borderRadius: 4,
                 display: "flex",
-                flexDirection: "column",
+                flexDirection: "row",
                 alignItems: "center",
-                justifyContent: "center",
-                height: 140,
-                minWidth: 150,
-                maxWidth: 220,
-                borderRadius: 3,
-                fontWeight: theme.typography.fontWeightBold,
-                fontSize: 18,
-                textTransform: "none",
-                boxShadow: theme.shadows[4],
-                px: 3,
-                py: 2,
-                transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                "&:hover": {
-                  boxShadow: theme.shadows[8],
-                  transform: "translateY(-6px)",
-                },
-                "&:focus-visible": {
-                  outline: `3px solid ${theme.palette.primary.dark}`,
-                  outlineOffset: 3,
+                gap: 2.5,
+                px: 2.5,
+                background: `rgba(255,255,255,0.72)`,
+                boxShadow: theme.shadows[6],
+                overflow: "hidden",
+                position: "relative",
+                border: `2px solid transparent`,
+                transition: "box-shadow 0.28s, border 0.2s, background 0.2s, transform 0.2s",
+                "&:hover, &:focus-visible": {
+                  boxShadow: theme.shadows[16],
+                  background: `rgba(255,255,255,0.98)`,
+                  border: `2px solid ${color}`,
+                  transform: "translateY(-3px) scale(1.027)",
+                  ".icon-bg": { filter: "brightness(0.94)" },
                 },
               }}
             >
-              {Icon && <Icon sx={{ fontSize: 42, mb: 1, color: "white" }} />}
-              {label}
-            </Button>
+              <Box
+                className="icon-bg"
+                sx={{
+                  flexShrink: 0,
+                  borderRadius: "50%",
+                  width: 56,
+                  height: 56,
+                  background: color,
+                  backgroundImage: `linear-gradient(135deg, ${color}90 40%, #fff5 130%)`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: `0 0 12px 0 ${color}33`,
+                  transition: "filter 0.2s",
+                }}
+              >
+                <Icon sx={{ color: "#fff", fontSize: 32 }} />
+              </Box>
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                textAlign="left"
+                sx={{
+                  fontFamily: theme.typography.fontFamily,
+                  color: theme.palette.text.primary,
+                  flexGrow: 1,
+                  letterSpacing: 1,
+                  userSelect: "none",
+                  fontSize: { xs: 18, sm: 20 },
+                  lineHeight: 1.1,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {label}
+              </Typography>
+            </ButtonBase>
           </Grid>
         ))}
       </Grid>
 
       <Box
         sx={{
-          mt: 12,
+          mt: 10,
           color: theme.palette.text.secondary,
           userSelect: "none",
           fontSize: 14,
           width: "100%",
-          maxWidth: 600,
+          textAlign: "center",
         }}
       >
         <Typography variant="body2">
